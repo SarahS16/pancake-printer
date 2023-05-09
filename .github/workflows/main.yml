@@ -1,18 +1,29 @@
-on: [push, pull_request]
+name: Compile Sketch
+
+# The workflow will run on every push and pull request to the repository
+on:
+  - push
+  - pull_request
+
 jobs:
-  test_schedule:
+  compile-sketch:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Test compile for Arduino
-      # You may pin to the exact commit or the version.
-      # uses: ArminJo/arduino-test-compile@a0645157de643ca05706c22a901c2080df62d570
-        uses: ArminJo/arduino-test-compile@v3
+      # This step makes the contents of the repository available to the workflow
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # For more information: https://github.com/arduino/compile-sketches#readme
+      - name: Compile sketch
+        uses: arduino/compile-sketches@v1
         with:
-          # Version of arduino-cli to use when building. Current (8/2022) one is 0.26.0.
-          # Comma sepatated list of patterns or filenames (without path) of the sketch(es) to test compile. Useful if the sketch is a *.cpp or *.c file or only one sketch in the repository should be compiled.
-          sketch-names: Marlin.ino
-          # The start directory to look for the sketch-names to test compile. Can be a path like "digistump-avr/libraries/*/examples/C*/" .
-          sketch-names-find-start: Marlin
-          # Fully Qualified Board Name of the Arduino board. You may add a suffix behind the fqbn with "|" to specify one board for e.g. different compile options like arduino:avr:uno|trace.
-          arduino-board-fqbn: arduino:avr:mega # optional, default is arduino:avr:uno
-          # Comma separated list of platform specifiers, if you require a fixed version like arduino:avr@1.8.2 or do not want the specifier derived from the 2 first elements of the arduino-board-fqbn or need more than one core.
+          fqbn: arduino:avr:mega # default is arduino:avr:uno
+          # The default is to compile for the Arduino Uno board. If you want to compile for other boards, use the `fqbn` input.
+          sketch-paths: |
+            # Configure the action to search all folders under the root of the repository for sketches and compile them.
+            # This is formatted as a YAML list, which makes it possible to have multiple sketch paths if needed.
+            - ./
+          libraries: |
+            # The "blink" sketch being compiled in this demo doesn't use any libraries, so just use an empty list
+            -
